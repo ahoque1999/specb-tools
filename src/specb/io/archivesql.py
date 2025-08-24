@@ -1,6 +1,8 @@
+# specb/io/archivesql.py
 # load from archive.sqlite3db
 
 import sqlite3
+import specb.compute.annotation as annotation
 
 def load_s2n(s: int, threshold:float, path_d: str='archive.sqlite3db', name_t: str='groundtruth') -> dict[int, float]:
     if not name_t.isidentifier():
@@ -42,3 +44,34 @@ def load_s2n(s: int, threshold:float, path_d: str='archive.sqlite3db', name_t: s
         raise ValueError(f"Malformed neighbors for ID={s}: {raw!r}") from exc
 
     return d
+
+def load_ls2a(ls: list[int], path_d: str='archive.sqlite3db', name_t: str='GROUNDTRUTH') ->dict[int, str]:
+    if not name_t.isidentifier():
+        raise ValueError(f"Invalid table name: {name_t!r}")
+
+    sql = (
+        f'''
+        SELECT PEPTIDE, NTERM, MODIFICATION, CHARGE, SIGNIFICANCE
+        FROM {name_t}
+        WHERE ID = ?
+        LIMIT 1
+        '''
+    )
+
+    res = {}
+
+    with sqlite3.connect(path_d) as conn:
+        cur = conn.cursor()
+        for s in ls:
+            cur.execute(sql, (s,))
+            row = cur.fetchone()
+            if row is None:
+                res[s] = "UNKNOWN"
+                continue
+            peptide, nterm, modification, charge, significance = row
+            if significance == 0:
+                res[s] = "UNKNOWN"
+                continue
+            res[s] = annotation.gen_a(peptide, nterm, modification, charge)
+
+    return res
