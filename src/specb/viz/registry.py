@@ -17,6 +17,12 @@ REGISTRY = {
         encoder_path="specb.viz.encode:chimera_by_purity",
         required_params={"tsv_path"},  
     ),
+    #temp
+    "chimera_by_purity_temp": MethodSpec(
+        labeller_path="specb.compute.labelling:chimera_by_purity_temp",
+        encoder_path="specb.viz.encode:chimera_by_purity_temp",
+        required_params=set(),  
+    ),
     "dbscan": MethodSpec(
         labeller_path="specb.compute.labelling:dbscan",
         encoder_path="specb.viz.encode:dbscan",
@@ -27,6 +33,16 @@ REGISTRY = {
         encoder_path="specb.viz.encode:msfragger",
         required_params={"path_d", "name_t"},
     ),
+    "boundary": MethodSpec(
+        labeller_path = "specb.compute.labelling:boundary",
+        encoder_path = "specb.viz.encode:boundary",
+        required_params = {"path_d_archive", "path_d_specb", "name_t_groundtruth", "name_t_groups"},
+    ),
+    "lc": MethodSpec(
+        labeller_path = "specb.compute.labelling:lc",
+        encoder_path = "specb.viz.encode:lc",
+        required_params = set(),
+    )
 }
 
 def _resolve(path: str) -> Any:

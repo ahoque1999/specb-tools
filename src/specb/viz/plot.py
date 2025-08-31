@@ -5,7 +5,7 @@ from .registry import REGISTRY, _resolve
 import inspect
 
 # given a cluster_id and some method, plot the graph with the correct labelling
-def network_graph(c, threshold, method, **kwargs):
+def network_graph(c, threshold_dist, method, **kwargs):
     G = nx.Graph()
 
     nodes = specb.io.specbsql.load_c2ls(c, path_d="cutoff_annotation.db", name_t="clusters")
@@ -27,6 +27,9 @@ def network_graph(c, threshold, method, **kwargs):
     call_args = {k: v for k, v in kwargs.items() if k in accepted}
     if "c" in accepted:
         call_args["c"] = c
+    if "threshold_dist" in accepted:
+        call_args["threshold_dist"] = threshold_dist
+    
 
     dict_s2label = labeller(nodes, **call_args)
     dict_s2color = encoder(dict_s2label)
@@ -34,7 +37,7 @@ def network_graph(c, threshold, method, **kwargs):
     for node in nodes:
         G.add_node(node)
     for node in nodes:
-        for neighbor, dist in specb.io.archivesql.load_s2n(node, threshold).items():
+        for neighbor, _ in specb.io.archivesql.load_s2n(node, threshold_dist).items():
             G.add_edge(node, neighbor)
 
     default_color = "yellow"
